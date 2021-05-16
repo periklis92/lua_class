@@ -21,6 +21,7 @@ namespace lclass
 				{
 					auto new_ptr = reinterpret_cast<instance_wrapper**>(lua_newuserdata(L, sizeof(instance_wrapper*)));
 					(*new_ptr) = instance;
+					instance->inc_ref_count();
 					luaL_setmetatable(L, "__luacpp_class_instance_metatable");
 				}
 				else

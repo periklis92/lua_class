@@ -43,7 +43,7 @@ namespace lclass
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
 				assert(iptr);
 				luaL_setmetatable(L, "__luacpp_class_instance_metatable");
-
+	
 				ptr->register_instance(*iptr);
 
 				int arg_err = 0;
@@ -65,11 +65,20 @@ namespace lclass
 			auto dtor = [](lua_State* L) ->int
 			{
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
-				T* inst = static_cast<T*>((*iptr)->get_data());
-				Alloc alloc = Alloc();
-				alloc.destroy(inst);
-				alloc.deallocate(inst, 1);
-				delete *iptr;
+				assert(*iptr);
+				if ((*iptr)->get_ref_count() > 1)
+				{
+					(*iptr)->dec_ref_count();
+				}
+				else
+				{
+					T* inst = static_cast<T*>((*iptr)->get_data());
+					assert(inst);
+					Alloc alloc = Alloc();
+					alloc.destroy(inst);
+					alloc.deallocate(inst, 1);
+					delete *iptr;
+				}
 				return 1;
 			};
 			detail::class_registry& cw = detail::class_registry::getInstance(L);
@@ -107,11 +116,22 @@ namespace lclass
 			};
 			auto dtor = [](lua_State* L) ->int
 			{
+
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
-				T* inst = static_cast<T*>((*iptr)->get_data());
-				Alloc alloc = Alloc();
-				alloc.destroy(inst);
-				alloc.deallocate(inst, 1);
+				assert(*iptr);
+				if ((*iptr)->get_ref_count() > 1)
+				{
+					(*iptr)->dec_ref_count();
+				}
+				else
+				{
+					T* inst = static_cast<T*>((*iptr)->get_data());
+					assert(inst);
+					Alloc alloc = Alloc();
+					alloc.destroy(inst);
+					alloc.deallocate(inst, 1);
+					delete *iptr;
+				}
 				return 1;
 			};
 			detail::class_registry& cw = detail::class_registry::getInstance(L);

@@ -40,6 +40,11 @@ public:
         return this;
     }
 
+    ~test_class()
+    {
+        std::cout << "Destroyed!" << std::endl;
+    }
+
 public:
     int a = 0;
     int b = 20;
@@ -70,7 +75,16 @@ int main()
     "print(c);                  "
     );
 
-	std::cout << "finished errCode: " << std::to_string(err) << std::endl;
+	std::cout << "test1 errCode: " << std::to_string(err) << std::endl;
+
+    err = luaL_dostring(L,
+    "for i=1,10000 do            "
+    "   local i = test_class()  "
+    "end                        "
+    );
+    
+    lua_close(L);
+	std::cout << "test2 errCode: " << std::to_string(err) << std::endl;
 	std::cin.get();
     return 0;
 }

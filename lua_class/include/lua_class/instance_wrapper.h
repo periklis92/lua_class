@@ -8,6 +8,14 @@ namespace lclass
 {
 	class class_wrapper;
 
+	namespace detail
+	{
+		struct data_wrapper
+		{
+
+		};
+	}
+
 	class instance_wrapper
 	{
 	public:
@@ -32,7 +40,12 @@ namespace lclass
 			m_func_to_call = nullptr;
 		}
 
+		void inc_ref_count() { m_refCount++; }
+		void dec_ref_count() { m_refCount--; }
+		int  get_ref_count() { return m_refCount; }
+
 	private:
+		int m_refCount = 1;
 		class_wrapper* m_cls = nullptr;
 		void* m_data = nullptr;
 		const std::function<int(lua_State*)>* m_func_to_call = nullptr;

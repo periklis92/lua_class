@@ -2,6 +2,7 @@ project(lua_class_test)
 
 if (MSVC)
 include("C:/vcpkg/scripts/buildsystems/vcpkg.cmake")
+add_compile_options(/MDd)
 endif()
 
 include_directories(${LUA_CLASS_INCLUDE_DIR})

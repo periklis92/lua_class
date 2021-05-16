@@ -10,13 +10,13 @@ namespace lclass
 	{
 		int instance_newindex_callback(lua_State* L)
 		{
-			instance_wrapper* ptr = reinterpret_cast<instance_wrapper*>(lua_touserdata(L, 1));
+			instance_wrapper** iptr = reinterpret_cast<instance_wrapper**>(lua_touserdata(L, 1));
 			std::string name = lua_tostring(L, 2);
 			std::string varName = "__set_" + name;
-			if (ptr->get_class().member_exists(name))
+			if ((*iptr)->get_class().member_exists(name))
 				return 0;
-			if (ptr->get_class().member_exists(varName)) 
-				return  ptr->get_class().call("__set_" + name);
+			if ((*iptr)->get_class().member_exists(varName)) 
+				return  (*iptr)->get_class().call("__set_" + name);
 
 			return 0;
 		}
@@ -29,8 +29,8 @@ namespace lclass
 
 		int instance_garbage_collector(lua_State* L)
 		{
-			instance_wrapper* ptr = reinterpret_cast<instance_wrapper*>(lua_touserdata(L, 1));
-			ptr->get_class().call("__cpp_dtor");
+			instance_wrapper** iptr = reinterpret_cast<instance_wrapper**>(lua_touserdata(L, 1));
+			(*iptr)->get_class().call("__cpp_dtor");
 			return 1;
 		}
 
