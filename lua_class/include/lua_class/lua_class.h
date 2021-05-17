@@ -36,23 +36,13 @@ namespace lclass
 			if (!res) throw error_creating_class();
 			auto ctor = [](lua_State* L) -> int
 			{
-				//When we come to this point we have created an instance_wrapper object at the top of the stack,
-				//that we need to initialize with the new instance of our class, and the class_wrapper instance below
 				class_wrapper* ptr = static_cast<class_wrapper*>(lua_touserdata(L, 1));
 				assert(ptr);
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
 				assert(iptr);
 				luaL_setmetatable(L, "__luacpp_class_instance_metatable");
 	
-				ptr->register_instance(*iptr);
-
-				int arg_err = 0;
-				bool arg_check = detail::args<Args...>::check(L, arg_err,  2);
-				if (!arg_check)
-				{
-					__ctor_arg_throw(L, ptr->name(), arg_err - 1);
-					return 0;
-				}
+				detail::args<Args...>::check(L, 2);
 
 				auto tuple = detail::args<Args...>::get(L, 2);
 				Alloc alloc = Alloc();
@@ -60,6 +50,8 @@ namespace lclass
 				assert(new_inst)
 				detail::constructor<sizeof...(Args), T>::create(new_inst, tuple);
 				*iptr = new instance_wrapper(ptr, new_inst);
+				ptr->register_instance(*iptr);
+
 				return 1;
 			};
 			auto dtor = [](lua_State* L) ->int
@@ -72,6 +64,8 @@ namespace lclass
 				}
 				else
 				{
+					class_wrapper& ptr = (*iptr)->get_class();
+					ptr.unregister_instance(*iptr);
 					T* inst = static_cast<T*>((*iptr)->get_data());
 					assert(inst);
 					Alloc alloc = Alloc();
@@ -95,9 +89,6 @@ namespace lclass
 			if (!res) throw error_creating_class();
 			auto ctor = [](lua_State* L) -> int
 			{
-				//When we come to this point we have created an instance_wrapper object at the top of the stack,
-				//that we need to initialize with the new instance of our class, and the class_wrapper instance below
-
 				class_wrapper* ptr = static_cast<class_wrapper*>(lua_touserdata(L, 1));
 				assert(ptr);
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_newuserdata(L, sizeof(instance_wrapper*)));
@@ -118,13 +109,15 @@ namespace lclass
 			{
 
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
-				assert(*iptr);
+				assert(iptr);
 				if ((*iptr)->get_ref_count() > 1)
 				{
 					(*iptr)->dec_ref_count();
 				}
 				else
 				{
+					class_wrapper& ptr = (*iptr)->get_class();
+					ptr.unregister_instance(*iptr);
 					T* inst = static_cast<T*>((*iptr)->get_data());
 					assert(inst);
 					Alloc alloc = Alloc();
@@ -134,44 +127,50 @@ namespace lclass
 				}
 				return 1;
 			};
-			detail::class_registry& cw = detail::class_registry::getInstance(L);
-			cw.get_class(typeid(T))->register_member("__cpp_ctor", std::function<int(lua_State*)>(ctor));
-			cw.get_class(typeid(T))->register_member("__cpp_dtor", std::function<int(lua_State*)>(dtor));
+			auto& reg = detail::class_registry::getInstance(L);
+			auto cls = reg.get_class(typeid(T));
+			assert(cls);
+			cls->register_member("__cpp_ctor", std::function<int(lua_State*)>(ctor));
+			cls->register_member("__cpp_dtor", std::function<int(lua_State*)>(dtor));
 			m_currclass.m_L = L;
 			return m_currclass;
 		}
 
 		template<class R>
-		lua_class& var(const std::string& name, R(T::* value), bool readonly = false)
+		lua_class& var(const std::string& name, R(T::* _member_var), bool readonly = false)
 		{
 			class_wrapper* cw = detail::class_registry::getInstance(m_L).get_class(typeid(T));
 			if (!readonly)
 			{
-				auto _set = [value](lua_State* L) -> int
+				auto _set = [_member_var](lua_State* L) -> int
 				{
 					//stack of __newindex { object, key, value }
 					instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
+					assert(iptr);
 					const char* name = lua_tostring(L, 2);
 					R _value = detail::to<R>(L, 3);
-					T* obj = static_cast<T*>((*iptr)->get_data());
-					if (obj)
+					T* _inst = static_cast<T*>((*iptr)->get_data());
+					assert(_inst);
+					if (_inst)
 					{
-						obj->*value = _value;
+						_inst->*_member_var = _value;
 						return 1;
 					}
 					return 0;
 				};
 				cw->register_member("__set_" + name, std::function<int(lua_State*)>(_set));
 			}
-			auto _get = [value](lua_State* L) -> int
+			auto _get = [_member_var](lua_State* L) -> int
 			{
 				//stack of __newindex { object, key, value }
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
+				assert(iptr);
 				const char* name = lua_tostring(L, 2);
-				T* obj = static_cast<T*>((*iptr)->get_data());
-				if (obj)
+				T* _inst = static_cast<T*>((*iptr)->get_data());
+				assert(_inst);
+				if (_inst)
 				{
-					R _value = obj->*value;
+					R _value = _inst->*_member_var;
 					detail::push<R>(L, _value);
 					return 1;
 				}
@@ -187,6 +186,8 @@ namespace lclass
 			auto function = [method](lua_State* L) -> int
 			{
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
+				assert(iptr);
+				detail::args<Args...>::check(L, 2);
 				auto tuple = detail::args<Args...>::get(L, 2);
 				detail::apply_method<sizeof...(Args)>::apply(static_cast<T*>((*iptr)->get_data()), method, tuple);
 				return 1;
@@ -202,6 +203,8 @@ namespace lclass
 			auto function = [method](lua_State* L) -> int
 			{
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
+				assert(iptr);
+				detail::args<Args...>::check(L, 2);
 				auto tuple = detail::args<Args...>::get(L, 2);
 				R ret = detail::apply_method<sizeof...(Args)>::apply(static_cast<T*>((*iptr)->get_data()), method, tuple);
 				detail::push(L, ret);
@@ -218,6 +221,7 @@ namespace lclass
 			auto function = [method](lua_State* L) -> int
 			{
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
+				assert(iptr);
 				T* ins = static_cast<T*>((*iptr)->get_data());
 				assert(ins);
 				R ret = (ins->*method)();
@@ -235,6 +239,7 @@ namespace lclass
 			auto function = [method](lua_State* L) -> int
 			{
 				instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
+				assert(iptr);
 				T* ins = static_cast<T*>((*iptr)->get_data());
 				(ins->*method)();
 				return 1;

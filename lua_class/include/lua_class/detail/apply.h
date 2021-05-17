@@ -3,7 +3,7 @@
 #include <string>
 #include <tuple>
 #include "lua.hpp"
-#include "lua_class/detail/stack_temp.h"
+#include "lua_class/detail/stack.h"
 
 namespace lclass
 {
@@ -19,15 +19,11 @@ namespace lclass
 				return std::tuple_cat(std::make_tuple<T>(to<T>(L, i)), args<Args...>::get(L, i + 1));
 			}
 
-			static inline bool check(lua_State* L, int& arg_err, const int i = 1)
+			static inline void check(lua_State* L, const int i = 1)
 			{
-				bool result = is<T>(L, i);
-				if (result)
-				{
-					return args<Args...>::check(L, arg_err, i + 1);
-				}
-				arg_err = i;
-				return false;
+				if (!is_type<T>(L, i) && !is_convertible<T>(L, i))
+					luaL_argerror(L, i, "Wrong Argument!");
+				args<Args...>::check(L, i + 1);
 			}
 		};
 
@@ -38,15 +34,10 @@ namespace lclass
 				return std::tuple<T>(to<T>(L, i));
 			}
 
-			static inline bool check(lua_State* L, int& arg_err, const int i = 1)
+			static inline void check(lua_State* L, const int i = 1)
 			{
-				bool result = is<T>(L, i);
-				if (result)
-				{
-					return true;
-				}
-				arg_err = i;
-				return false;
+				if (!is_type<T>(L, i))
+					luaL_argerror(L, i, "Wrong Argument!");
 			}
 		};
 

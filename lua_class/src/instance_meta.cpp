@@ -49,7 +49,8 @@ namespace lclass
 			std::string name = lua_tostring(L, 2);
 			if (ptr.member_exists(name))
 			{
-				ptr.push_call(name, *iptr);
+				// ptr.push_call(name, *iptr);
+				(*iptr)->push_function(L, name);
 				return 1;
 			}
 

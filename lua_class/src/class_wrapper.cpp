@@ -1,6 +1,9 @@
 #include "lua_class/class_wrapper.h"
-#include "lua_class/instance_wrapper.h"
+
 #include <algorithm>
+#include <cassert>
+
+#include "lua_class/instance_wrapper.h"
 
 namespace lclass
 {
@@ -23,16 +26,10 @@ namespace lclass
 		return member->second(m_L);
 	}
 
-	void class_wrapper::push_call(const std::string& name, instance_wrapper* iptr) const
-	{
-		iptr->push_function(&m_members.find(name)->second);
-		lua_pushcclosure(m_L, _pushed_call, 0);
-	}
-
 	std::string class_wrapper::get_info() const
 	{
 		std::stringstream str;
-		str << "class_name: " << m_name << "\n|-type_id: " << m_tinfo->hash_code() <<
+		str << "class_name: " << m_name << "\n|-type_hash: " << m_tinfo->hash_code() <<
 			"\n|-cpp_name: " << m_tinfo->name() << "\n|-members:";
 		for (auto& m : m_members)
 		{
@@ -40,6 +37,13 @@ namespace lclass
 		}
 		str << "\n";
 		return str.str();
+	}
+
+	std::function<int(lua_State*)>* class_wrapper::get_member_prototype(const std::string& name)
+	{
+		auto it = m_members.find(name);
+		assert(it != m_members.end());
+		return &(it->second);
 	}
 
 	void class_wrapper::push_table()
@@ -56,20 +60,17 @@ namespace lclass
 	instance_wrapper* class_wrapper::find_instance(void* data)
 	{
 		auto it = std::find_if(m_instances.begin(), m_instances.end(), [data](instance_wrapper* i) -> bool { return i->get_data() == data; });
-		// auto it = std::find(m_instances.begin(), m_instances.end(), data);
 		if (it == m_instances.end()) return nullptr;
 		return *it;
+	}
+
+	void class_wrapper::unregister_instance(instance_wrapper* instance)
+	{
+		m_instances.remove(instance);
 	}
 
 	class_wrapper::~class_wrapper()
 	{
 		luaL_unref(m_L, LUA_REGISTRYINDEX, m_luaFuncTable);
-	}
-
-	int class_wrapper::_pushed_call(lua_State* L)
-	{
-		instance_wrapper** ptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
-		(*ptr)->call_function(L);
-		return 1;
 	}
 }
