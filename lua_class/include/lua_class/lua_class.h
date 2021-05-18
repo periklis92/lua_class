@@ -29,6 +29,11 @@ namespace lclass
 	public:
 		using Alloc = std::allocator<T>;
 
+		/**
+		 * Registers a constructor with arguments
+		 * @tparam Args Constructor arguments
+		 * @param name The name used to create the class in lua
+		 */
 		template<class...Args>
 		static lua_class& ctor(lua_State* L, const std::string& name)
 		{
@@ -82,6 +87,10 @@ namespace lclass
 			return m_currclass;
 		}
 
+		/**
+		 * Registers a constructor with no arguments
+		 * @param name The name used to create the class in lua
+		 */
 		template<>
 		static lua_class& ctor(lua_State* L, const std::string& name)
 		{

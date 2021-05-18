@@ -8,9 +8,9 @@ const auto l = []() -> void {};
 class test_class
 {
 public:
-    test_class()
+    test_class(int _a = 0)
     {
-        std::cout << "Test Class Created!" << std::endl;
+        std::cout << "Test Class Created! def arg: " << std::to_string(_a)  << std::endl;
     }
     
     void void1()
@@ -76,7 +76,7 @@ int main()
     
     
     int err = luaL_dostring(L, 
-    "local e = test_class();    "
+    "local e = test_class(123);    "
     "local e3 = test_class();    "
     "local array = {};"
     "e:void();                  "

@@ -1,5 +1,5 @@
 # lua_class
-## *Binder library for lua and c++*
+## *Simple and minimal c++ - lua binder library for*
 
 ### work in progress
 
