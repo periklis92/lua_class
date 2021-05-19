@@ -26,6 +26,24 @@ namespace lclass
 		return member->second(m_L);
 	}
 
+	void class_wrapper::push_call(const std::string& name)
+	{
+		auto it = m_members.find(name);
+		assert(it != m_members.end());
+		m_func_to_call = &(it->second);
+
+		auto lFunc = [](lua_State* L) -> int
+		{
+			class_wrapper* ptr = static_cast<class_wrapper*>(lua_touserdata(L, lua_upvalueindex(1)));
+			assert(ptr);
+			(*((ptr)->m_func_to_call))(L);
+			ptr->m_func_to_call = nullptr;
+			return 1;
+		};
+		lua_pushlightuserdata(m_L, this);
+		lua_pushcclosure(m_L, lFunc, 1);
+	}
+
 	std::string class_wrapper::get_info() const
 	{
 		std::stringstream str;

@@ -48,6 +48,17 @@ public:
         return this;
     }
 
+    static void asd(int bb)
+    {
+        std::cout << "Static asd!" << std::to_string(bb) << std::endl;
+    }
+
+    static int asd2()
+    {
+        std::cout << "Static asd2!" << std::endl;
+        return 123;
+    }
+
     ~test_class()
     {
         std::cout << "Destroyed!" << std::endl;
@@ -56,43 +67,55 @@ public:
 public:
     int a = 0;
     int b = 20;
+    static float c;
 };
+
+float test_class::c = 1.5f;
 
 int main()
 {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     lclass::open_lclass(L);
-    lclass::lua_class<test_class>
-        ::ctor(L, "test_class")
+    lclass::lua_class<test_class>()
+        .ctor(L, "test_class")
         .method("void", &test_class::void1)
         .method("void2", &test_class::void2)
         .method("add", &test_class::add)
         .method("add_a_b", &test_class::add_a_b)
         .method("pointer_from", &test_class::pointer_from)
+        .method("static1", &test_class::asd)
+        .method("static2", &test_class::asd2)
         .var("a_var", &test_class::a)
         .var("b_read", &test_class::b, true)
-        .method("instance", &test_class::instance);
+        .var("c", &test_class::c)
+        .method("instance", &test_class::instance); 
     
+
     
     int err = luaL_dostring(L, 
-    "local e = test_class(123);    "
-    "local e3 = test_class();    "
-    "local array = {};"
-    "e:void();                  "
-    "local e2 = e:instance();   " 
-    "e2:void2();                "
-    "e2:add(1.4, 2);              "
-    "local c = e2:add_a_b();    "
-    "print(\"c= \", c);         "
-    "e.a_var = 3;"
-    "e2.a_var = 4;"
-    "e3.a_var = 125;"
-    "e2 = e3;"
-    "print(e2.a_var);"
-    "print(e.a_var);"
-    "print(e3.a_var);"
-    "e:pointer_from(e3);"
+        "local e = test_class();    "
+        "local e3 = test_class();    "
+        "local array = {};"
+        "e:void();                  "
+        "local e2 = e:instance();   " 
+        "e2:void2();                "
+        "e2:add(1.4, 2);              "
+        "local c = e2:add_a_b();    "
+        "print(\"c= \", c);         "
+        "e.a_var = 3;"
+        "e2.a_var = 4;"
+        "e3.a_var = 125;"
+        "e2 = e3;"
+        "print(e2.a_var);"
+        "print(e.a_var);"
+        "print(e3.a_var);"
+        "e:pointer_from(e3);"
+        "test_class.static1(2);"
+        "test_class.static2();"
+        "print(test_class.c);"
+        "test_class.c = 2;"
+        "print(test_class.c);"
     );
     
 	std::cout << "test1 errCode: " << std::to_string(err) << std::endl;

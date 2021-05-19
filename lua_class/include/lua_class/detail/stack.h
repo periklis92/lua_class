@@ -41,6 +41,9 @@ namespace lclass
 		void push<double>(lua_State* L, double value) { lua_pushnumber(L, value); }
 
 		template<>
+		void push<float>(lua_State* L, float value) { lua_pushnumber(L, value); }
+
+		template<>
 		void push<bool>(lua_State* L, bool value) { lua_pushboolean(L, value); }
 
 		template<class T>
@@ -53,7 +56,7 @@ namespace lclass
 		T to(lua_State* L, int i = 1)
 		{
 			static_assert(std::is_pointer_v<T>, "You cannot pass argument of this type by value!");
-			return *reinterpret_cast<T*>(lua_touserdata(L, i));
+			return static_cast<T>((*reinterpret_cast<instance_wrapper**>(lua_touserdata(L, i)))->get_data());
 		}
 
 		template<>

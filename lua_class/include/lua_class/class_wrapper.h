@@ -36,12 +36,19 @@ namespace lclass
 		void register_member(const std::string& name, std::function<int(lua_State*)>&& function);
 		
 		/**
-		 * Call a class member function. (Used for static functions)
+		 * Call a class member function.
 		 * 
 		 * @param name The name of the function.
 		 */
 		int call(const std::string& name) const;
 		
+		/**
+		 * Push a static function to the stack
+		 * 
+		 * @param name The name of the function.
+		 */
+		void push_call(const std::string& name);
+
 		/**
 		 * @return String with meta info about the class.
 		 */
@@ -110,6 +117,6 @@ namespace lclass
 		lua_State* m_L;
 		std::map<std::string, std::function<int(lua_State*)>> m_members;
 		std::list<instance_wrapper*> m_instances;
-
+		std::function<int(lua_State*)>* m_func_to_call = nullptr;
 	};
 }

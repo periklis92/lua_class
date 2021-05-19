@@ -36,8 +36,21 @@ namespace lclass
 
 			static inline void check(lua_State* L, const int i = 1)
 			{
-				if (!is_type<T>(L, i))
+				if (!is_type<T>(L, i) && !is_convertible<T>(L, i))
 					luaL_argerror(L, i, "Wrong Argument!");
+			}
+		};
+
+		template<>
+		struct args<> {
+			static inline std::tuple<> get(lua_State* L, const int i = 1)
+			{
+				return std::make_tuple();
+			}
+
+			static inline void check(lua_State* L, const int i = 1)
+			{
+				
 			}
 		};
 
@@ -62,12 +75,22 @@ namespace lclass
 			static R apply(T* o, R(T::* function)(FunctionArgs...), std::tuple<TupleArgs...>& t, Args... args) {
 				return apply_method<N - 1>::apply(o, function, t, std::get<N - 1>(t), args...);
 			}
+			
+			template <typename R, typename... FunctionArgs, typename... TupleArgs, typename... Args>
+			static R apply(R(*function)(FunctionArgs...), std::tuple<TupleArgs...>& t, Args... args) {
+				return apply_method<N - 1>::apply(function, t, std::get<N - 1>(t), args...);
+			}
 		};
 
 		template <> struct apply_method<0> {
 			template <typename T, typename R, typename... FunctionArgs, typename... TupleArgs, typename... Args>
 			static R apply(T* o, R(T::* function)(FunctionArgs...), std::tuple<TupleArgs...>& t, Args... args) {
 				return (o->*function)(args...);
+			}
+			
+			template <typename R, typename... FunctionArgs, typename... TupleArgs, typename... Args>
+			static R apply(R(*function)(FunctionArgs...), std::tuple<TupleArgs...>& t, Args... args) {
+				return (*function)(args...);
 			}
 		};
 

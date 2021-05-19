@@ -37,19 +37,13 @@ namespace lclass
 		int instance_index_callback(lua_State* L)
 		{
 			instance_wrapper** iptr = reinterpret_cast<instance_wrapper**>(lua_touserdata(L, 1));
+			
+			assert(iptr);
 			class_wrapper& ptr = (*iptr)->get_class();
-			int top = lua_gettop(L);
-			if (!iptr)
-			{
-				std::cerr << "Object instance is null" << std::endl;
-				lua_pushnil(L);
-				return 0;
-			}
 
 			std::string name = lua_tostring(L, 2);
 			if (ptr.member_exists(name))
 			{
-				// ptr.push_call(name, *iptr);
 				(*iptr)->push_function(L, name);
 				return 1;
 			}
