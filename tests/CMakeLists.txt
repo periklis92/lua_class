@@ -6,8 +6,8 @@ endif()
 
 include_directories(${LUA_CLASS_INCLUDE_DIR})
 
-find_package(Lua REQUIRED)
+find_package(Lua 5.3 REQUIRED)
 
 add_executable(${PROJECT_NAME} main.cpp ${LUA_CLASS_SOURCES})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE lua5.3)
 target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_CLASS_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
