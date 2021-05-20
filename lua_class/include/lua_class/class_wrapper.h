@@ -77,7 +77,7 @@ namespace lclass
 		/**
 		 * @return The type info of the class.
 		 */
-		const type_info& tinfo() const { return *m_tinfo; }
+		const std::type_info& tinfo() const { return *m_tinfo; }
 
 		/**
 		 * @tparam T The type to check against.

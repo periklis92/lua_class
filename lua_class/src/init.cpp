@@ -10,7 +10,7 @@ namespace lclass
 {
 	namespace detail
 	{
-			bool register_cpp_class(lua_State* L, const type_info& tinfo, const std::string& name)
+			bool register_cpp_class(lua_State* L, const std::type_info& tinfo, const std::string& name)
 			{
 				void* ptr = lua_newuserdata(L, sizeof(class_wrapper));
 				new(ptr) class_wrapper(L, tinfo, name);

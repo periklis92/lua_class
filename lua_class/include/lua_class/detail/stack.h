@@ -11,7 +11,7 @@ namespace lclass
 		void push(lua_State* L, T value)
 		{
 			static_assert(std::is_pointer<T>::value, "LuaStack: Non pointer types cannot be pushed on the lua stack like that!");
-			auto cls_wrap = class_registry::getInstance(L).get_class(typeid(std::remove_pointer<T>::type));
+			auto cls_wrap = class_registry::getInstance(L).get_class(typeid(std::remove_pointer_t<T>));
 			if (!cls_wrap)
 				lua_pushlightuserdata(L, value);
 			else
@@ -55,7 +55,7 @@ namespace lclass
 		template<class T>
 		T to(lua_State* L, int i = 1)
 		{
-			static_assert(std::is_pointer_v<T>, "You cannot pass argument of this type by value!");
+			static_assert(std::is_pointer<T>::value, "You cannot pass argument of this type by value!");
 			return static_cast<T>((*reinterpret_cast<instance_wrapper**>(lua_touserdata(L, i)))->get_data());
 		}
 

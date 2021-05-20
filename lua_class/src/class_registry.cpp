@@ -47,7 +47,7 @@ namespace lclass
 			m_classes.insert(std::pair<std::type_index, class_wrapper*>(std::type_index(cls->tinfo()), cls));
 		}
 
-		bool class_registry::is_registered(const type_info& tinfo)
+		bool class_registry::is_registered(const std::type_info& tinfo)
 		{
 			return m_classes.find(tinfo) != m_classes.end();
 		}
@@ -61,7 +61,7 @@ namespace lclass
 			return false;
 		}
 
-		class_wrapper* class_registry::get_class(const type_info& tinfo)
+		class_wrapper* class_registry::get_class(const std::type_info& tinfo)
 		{
 			auto it = m_classes.find(tinfo);
 			if (it == m_classes.end()) return nullptr;

@@ -17,9 +17,9 @@ namespace lclass
 		public:
 			static class_registry& getInstance(lua_State* L);
 			void register_class(class_wrapper* cls);
-			bool is_registered(const type_info& tinfo);
+			bool is_registered(const std::type_info& tinfo);
 			bool is_registered(const std::string& name);
-			class_wrapper* get_class(const type_info& tinfo);
+			class_wrapper* get_class(const std::type_info& tinfo);
 
 		private:
 			lua_State* m_L;
