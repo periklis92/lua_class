@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <string>
+#include <typeinfo>
 #include "lua.hpp"
 
 namespace lclass

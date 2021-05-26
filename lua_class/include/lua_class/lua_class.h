@@ -29,15 +29,20 @@ namespace lclass
 	public:
 		using Alloc = std::allocator<T>;
 
+		lua_class(lua_State* L)
+		:m_L(L)
+		{
+		}
+
 		/**
 		 * Registers a constructor with arguments
 		 * @tparam Args Constructor arguments
 		 * @param name The name used to create the class in lua
 		 */
 		template<class...Args>
-		lua_class& ctor(lua_State* L, const std::string& name)
+		lua_class& ctor(const std::string& name)
 		{
-			bool res = detail::register_cpp_class(L, typeid(T), name);
+			bool res = detail::register_cpp_class(m_L, typeid(T), name);
 			if (!res) throw error_creating_class();
 			auto ctor = [](lua_State* L) -> int
 			{
@@ -84,11 +89,10 @@ namespace lclass
 				}
 				return 1;
 			};
-			detail::class_registry& cw = detail::class_registry::getInstance(L);
+			detail::class_registry& cw = detail::class_registry::getInstance(m_L);
 			cw.get_class(typeid(T))->register_member("__cpp_ctor", std::function<int(lua_State*)>(ctor));
 			cw.get_class(typeid(T))->register_member("__cpp_dtor", std::function<int(lua_State*)>(dtor));
-			m_currclass.m_L = L;
-			return m_currclass;
+			return *this;
 		}
 
 		template<class R>
@@ -227,42 +231,8 @@ namespace lclass
 			return *this;
 		}
 
-		// template<class R>
-		// lua_class& method(const std::string& name, R(T::* method)())
-		// {
-		// 	auto function = [method](lua_State* L) -> int
-		// 	{
-		// 		instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
-		// 		assert(iptr);
-		// 		T* ins = static_cast<T*>((*iptr)->get_data());
-		// 		assert(ins);
-		// 		R ret = (ins->*method)();
-		// 		detail::push<R>(L, ret);
-		// 		return 1;
-		// 	};
-		// 	class_wrapper* cw = detail::class_registry::getInstance(m_L).get_class(typeid(T));
-		// 	cw->register_member(name, std::function<int(lua_State*)>(function));
-		// 	return *this;
-		// }
-
-		// template<class R = void>
-		// lua_class& method(const std::string& name, void(T::* method)())
-		// {
-		// 	auto function = [method](lua_State* L) -> int
-		// 	{
-		// 		instance_wrapper** iptr = static_cast<instance_wrapper**>(lua_touserdata(L, 1));
-		// 		assert(iptr);
-		// 		T* ins = static_cast<T*>((*iptr)->get_data());
-		// 		(ins->*method)();
-		// 		return 1;
-		// 	};
-		// 	class_wrapper* cw = detail::class_registry::getInstance(m_L).get_class(typeid(T));
-		// 	cw->register_member(name, std::function<int(lua_State*)>(function));
-		// 	return *this;
-		// }
 	private:
 		lua_State* m_L;
-		static lua_class m_currclass;
 
 	private:
 		static void __ctor_arg_throw(lua_State* L, const std::string name, int position)
@@ -272,7 +242,4 @@ namespace lclass
 			lua_pushnil(L);
 		}
 	};
-
-	template<class T>
-	lua_class<T> lua_class<T>::m_currclass;
 }
