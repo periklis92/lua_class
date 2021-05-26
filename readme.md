@@ -24,11 +24,6 @@ The purpose of this library is to make it easy for anyone to bind their C++ code
     example_class.static_method();
     obj.var_one = 2;
 ```
----
-
-## To do:
-- Create a single include header.
-- Improve error messages.
 
 ---
 
@@ -42,4 +37,9 @@ Example:
     target_link_libraries(${PROJECT_NAME} PRIVATE ${LUA_LIBRARIES})
     target_include_directories(${PROJECT_NAME} PRIVATE ${LUA_CLASS_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
 ```
-There two convenience CMake variables one for the sources ${LUA_CLASS_SOURCES} and one for the include directory ${LUA_CLASS_INCLUDE_DIR}.
+There are two convenience CMake variables one for the sources ${LUA_CLASS_SOURCES} and one for the include directory ${LUA_CLASS_INCLUDE_DIR}.
+---
+
+## To do:
+- Create a single include header.
+- Improve error messages.
