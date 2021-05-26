@@ -6,6 +6,7 @@ The purpose of this library is to make it easy for anyone to bind their C++ code
 
 
 ### Example usage:
+### C++:
 ```C++
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
@@ -15,6 +16,13 @@ The purpose of this library is to make it easy for anyone to bind their C++ code
         .method("method_one", &example_class::method_one)
         .method("static_method", &example_class::static_method)
         .var("var_one", &example_class::var_one);
+```
+### Lua:
+```lua
+    local obj = example_class();
+    obj:method_one();
+    example_class.static_method();
+    obj.var_one = 2;
 ```
 ---
 
