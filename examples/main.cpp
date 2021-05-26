@@ -59,21 +59,13 @@ int main()
         "i1.b = 10;"
         "example_class.c = 2;"
         "i1:printAll();"
-        // "i1:setAll(1, 2, 3);"
-        // "print(i1:addAll());"
+        "i1:setAll(1, 2, 3);"
+        "print(i1:addAll());"
 
     );
     
-	std::cout << "test1 errCode: " << std::to_string(err) << std::endl;
-
-    // err = luaL_dostring(L,
-    // "for i=1,10000 do            "
-    // "   local i = test_class()  "
-    // "end                        "
-    // );
-	// std::cout << "test2 errCode: " << std::to_string(err) << std::endl;
+	std::cout << "error code: " << std::to_string(err) << std::endl;
     
     lua_close(L);
-	// std::cin.get();
     return 0;
 }
