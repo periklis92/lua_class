@@ -11,8 +11,8 @@ The purpose of this library is to make it easy for anyone to bind their C++ code
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     lclass::open_lclass(L);
-    lclass::lua_class<example_class>()
-        .ctor(L, "example_class") //Constructor with no arguments
+    lclass::lua_class<example_class>(L)
+        .ctor("example_class") //Constructor with no arguments
         .method("method_one", &example_class::method_one)
         .method("static_method", &example_class::static_method)
         .var("var_one", &example_class::var_one);
