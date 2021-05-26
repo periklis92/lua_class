@@ -23,12 +23,20 @@ namespace lclass
 		detail::init_cpp_instance_metatable(L);
 	}
 
+	/**
+	 * Helper class to bind any class to a lua state
+	 * @tparam T The class to register
+	 */
 	template<class T>
 	class lua_class
 	{
 	public:
 		using Alloc = std::allocator<T>;
 
+		/**
+		 * Creates a new lua_class for the specific lua State
+		 * @param L The lua state in which the class will be registered
+		 */
 		lua_class(lua_State* L)
 		:m_L(L)
 		{
@@ -95,6 +103,13 @@ namespace lclass
 			return *this;
 		}
 
+		/**
+		 * Registers a member variable
+		 * @tparam R The type of the variable
+		 * @param name The name used in lua to access the member
+		 * @param _member_var The address of the member in C++
+		 * @param readonly Whether the value can only be read from lua (default: false)
+		 */
 		template<class R>
 		lua_class& var(const std::string& name, R(T::* _member_var), bool readonly = false)
 		{
@@ -139,6 +154,13 @@ namespace lclass
 			return *this;
 		}
 
+		/**
+		 * Registers a static member variable
+		 * @tparam R The type of the variable
+		 * @param name The name used in lua to access the member
+		 * @param _member_var The address of the member in C++
+		 * @param readonly Whether the value can only be read from lua (default: false)
+		 */
 		template<class R>
 		lua_class& var(const std::string& name, R(*_member_var), bool readonly = false)
 		{
@@ -165,6 +187,12 @@ namespace lclass
 			return *this;
 		}
 
+		/**
+		 * Registers a member method
+		 * @tparam Args The argument types of the method
+		 * @param name The name used in lua to access the member
+		 * @param method The address of the member in C++
+		 */
 		template<class...Args>
 		lua_class& method(const std::string& name, void(T::* method)(Args...))
 		{
@@ -182,6 +210,13 @@ namespace lclass
 			return *this;
 		}
 
+		/**
+		 * Registers a member method that returns a value
+		 * @tparam R The return type of the method
+		 * @tparam Args The argument types of the method
+		 * @param name The name used in lua to access the member
+		 * @param method The address of the member in C++
+		 */
 		template<class R, class...Args>
 		lua_class& method(const std::string& name, R(T::* method)(Args...))
 		{
@@ -200,6 +235,13 @@ namespace lclass
 			return *this;
 		}		
 
+		
+		/**
+		 * Registers a static member method
+		 * @tparam Args The argument types of the method
+		 * @param name The name used in lua to access the member
+		 * @param method The address of the member in C++
+		 */
 		template<class...Args>
 		lua_class& method(const std::string& name, void(*method)(Args...))
 		{
@@ -215,6 +257,13 @@ namespace lclass
 			return *this;
 		}
 
+		/**
+		 * Registers a static member method that returns a value
+		 * @tparam R The return type of the method
+		 * @tparam Args The argument types of the method
+		 * @param name The name used in lua to access the member
+		 * @param method The address of the member in C++
+		 */
 		template<class R, class...Args>
 		lua_class& method(const std::string& name, R(*method)(Args...))
 		{
