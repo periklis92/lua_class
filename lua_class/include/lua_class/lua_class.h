@@ -17,10 +17,28 @@
 struct error_creating_class {};
 namespace lclass
 {
+	/**
+	 * Initialize the library for a specify lua state
+	 * 
+	 * @param L The lua State.
+	 */
 	void open_lclass(lua_State* L)
 	{
 		detail::init_cpp_class_metatable(L);
 		detail::init_cpp_instance_metatable(L);
+	}
+
+	/**
+	 * Invokes a function for all instances
+	 * 
+	 * @param name The name of the function.
+	 */
+	template<typename T>
+	void invoke_function(lua_State* L, const std::string& name)
+	{
+		detail::class_registry& cr = detail::class_registry::getInstance(L);
+		class_wrapper* cw = cr.get_class(typeid(T));
+		cw->invoke_for_all(name);
 	}
 
 	/**

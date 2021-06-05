@@ -41,6 +41,13 @@ namespace lclass
 		 * @param name The name of the function.
 		 */
 		int call(const std::string& name) const;
+
+		/**
+		 * Invokes a function for all instances
+		 * 
+		 * @param name The name of the function.
+		 */
+		void invoke_for_all(const std::string& name);
 		
 		/**
 		 * Push a static function to the stack

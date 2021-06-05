@@ -26,6 +26,17 @@ namespace lclass
 		return member->second(m_L);
 	}
 
+	void class_wrapper::invoke_for_all(const std::string& name)
+	{
+		push_table();
+		for (auto& instance: m_instances)
+		{
+			lua_getfield(m_L, -1, name.c_str());
+			lua_call(m_L, 0, 1);
+			lua_pop(m_L, 1);
+		}
+	}
+
 	void class_wrapper::push_call(const std::string& name)
 	{
 		auto it = m_members.find(name);

@@ -48,19 +48,22 @@ namespace lclass
 		{
 			class_wrapper* ptr = static_cast<class_wrapper*>(lua_touserdata(L, 1));
 			std::string name = lua_tostring(L, 2);
-			// if (ptr->member_exists(name))
-			// 	return 0;
+			if (ptr->member_exists(name))
+			{
+				std::cerr << "Member with name: " << name << " already exists!" << std::endl;
+				return 0;
+			}
 
 			std::string varName = "__set_" + name;
 			if (ptr->member_exists(varName)) 
 				return  ptr->call("__set_" + name);
-			// class_wrapper* ptr = static_cast<class_wrapper*>(lua_touserdata(L, 1));
-			// if (lua_type(L, 3) != LUA_TFUNCTION)
-			// {
-			// 	std::cerr << "You can only add function members to the class!\n||\t-> "
-			// 		<< ptr->name().c_str() << ":" << lua_tostring(L, 2) << " (" << lua_typename(L, 3) << ")" << std::endl;
-			// 	return 0;
-			// }
+
+			if (lua_type(L, 3) != LUA_TFUNCTION)
+			{
+				std::cerr << "You can only add function members to the class!\n||\t-> "
+					<< ptr->name().c_str() << ":" << lua_tostring(L, 2) << " (" << lua_typename(L, 3) << ")" << std::endl;
+				return 0;
+			}
 
 			// const char* name = lua_tostring(L, 2);
 			// if (ptr->member_exists(name))
@@ -68,11 +71,11 @@ namespace lclass
 			// 	std::cerr << "Member with name: " << name << " already exists!" << std::endl;
 			// 	return 0;
 			// }
-
-			// ptr->push_table();
-			// lua_insert(L, -3);
-			// lua_rawset(L, -3);
-			// lua_pop(L, 1);
+			
+			ptr->push_table();
+			lua_insert(L, -3);
+			lua_rawset(L, -3);
+			lua_pop(L, 1);
 
 			return 1;
 		}
